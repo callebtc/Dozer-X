@@ -19,7 +19,7 @@
 ]]></description>
 <pubDate>Thu, 14 May 2026 15:56:44 -0500</pubDate>
 <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-<enclosure url="https://github.com/callebtc/Dozer-X/releases/download/v5.0.0/Dozer-5.0.0.zip" sparkle:version="50" sparkle:shortVersionString="5.0.0" length="2128634" type="application/octet-stream" sparkle:edSignature="04NsTwktbLH9KRmiE8Cw1omFAyITPV+UuTdZQSDjn3+jKXSAUZuA0M+dYZQz7BwaKS3RyDc9SHWU/N/yaARUBA=="/>
+<enclosure url="https://github.com/callebtc/Dozer-X/releases/download/v5.0.0/Dozer-5.0.0-universal.dmg" sparkle:version="50" sparkle:shortVersionString="5.0.0" length="2181103" type="application/octet-stream" sparkle:edSignature="qhZJVpTxikRVEhPw62VEGQl2Z1dVdw9JUgLLnAJlHf8x6Mvr9nmIAZI5S2IoUwqwCb8EXDPHEUsw/WdvCkOyCw=="/>
 </item>
 </channel>
 </rss>
