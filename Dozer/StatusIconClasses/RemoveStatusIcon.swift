@@ -1,7 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
 import Cocoa
 import Defaults
 
@@ -20,7 +16,7 @@ class RemoveStatusIcon: HelperstatusIcon {
         case .leftMouseDown:
             DozerIcons.shared.toggleRemove()
         case .rightMouseDown:
-            appDelegate.preferencesWindowController.show(preferencePane: .general)
+            AppDelegate.shared.preferencesWindowController.show(preferencePane: .general)
         default:
             break
         }

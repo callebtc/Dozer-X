@@ -1,7 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
 import Cocoa
 import Defaults
 
@@ -107,7 +103,7 @@ public final class DozerIcons {
             Defaults[.showIconAndMenuEnabled] = self.enableIconAndMenu
             if self.enableIconAndMenu == false {
                 _ = DozerIcons.toggleDockIcon(showIcon: false)
-                appDelegate.preferencesWindowController.show(preferencePane: .general)
+                AppDelegate.shared.preferencesWindowController.show(preferencePane: .general)
             }
         }
     }
@@ -181,8 +177,9 @@ public final class DozerIcons {
     }
 
     public func showIconAndMenu() {
-        if NSWorkspace.shared.frontmostApplication?.bundleIdentifier != AppInfo.bundleIdentifier {
-            previousApp = NSWorkspace.shared.frontmostApplication!
+        if let frontmost = NSWorkspace.shared.frontmostApplication,
+           frontmost.bundleIdentifier != AppInfo.bundleIdentifier {
+            previousApp = frontmost
         }
         if Defaults[.showIconAndMenuEnabled] {
             _ = DozerIcons.toggleDockIcon(showIcon: true)
@@ -231,7 +228,6 @@ public final class DozerIcons {
 
     // MARK: Show/hide lifecycle
     private func didShowStatusBarIcons() {
-        //startTimer()
         startUserInteractionTimer()
     }
 
@@ -293,7 +289,7 @@ public final class DozerIcons {
         }
     }
 
-    /// Will crash if trying to get ´DozerIcon´ which does not exist in the menu bar
+    /// Will crash if trying to get DozerIcon which does not exist in the menu bar
     private func get(dozerIcon: DozerIcon) -> HelperstatusIcon {
         var normalStatusIconsXPosition: [CGFloat] = []
         for statusIcon in dozerIcons where statusIcon.type == .normal {
@@ -328,8 +324,6 @@ public final class DozerIcons {
     }
 
     /// Determines if the user is interacting with the menu bar based on level, owner and y-coordinate
-    ///
-    /// - Returns: Returns whether the user is interacting with the menu bar or not
     private func isUserInteractingWithStatusBar() -> Bool {
         let windowListType = CGWindowListOption.optionOnScreenOnly
         guard let windowInfoList = CGWindowListCopyWindowInfo(windowListType, kCGNullWindowID) as NSArray? as? [[String: AnyObject]] else {
@@ -339,7 +333,6 @@ public final class DozerIcons {
 
         for windowInfo in windowInfoList {
             guard let window = Window(windowInfo),
-                // If the preferences window are close to the menu bar it won't auto hide
                 window.owner != "Dozer" else {
                     continue
             }
@@ -355,7 +348,7 @@ public final class DozerIcons {
 
             for statusBarApp in statusBarAppsWindowInfo {
                 guard statusBarApp.owner == window.owner else { continue }
-                guard (statusBarApp.y + 22...statusBarApp.y + 30).contains(window.y) else { continue }
+                guard (statusBarApp.y + 22...statusBarApp.y + 37).contains(window.y) else { continue }
 
                 return true
             }
@@ -403,7 +396,7 @@ public final class DozerIcons {
         }
 
         var isStatusIcon: Bool {
-            guard level == 25 && height == 22 else {
+            guard level == 25 && height >= 22 && height <= 37 else {
                 return false
             }
             return true

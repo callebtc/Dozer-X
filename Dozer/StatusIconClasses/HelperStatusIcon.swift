@@ -20,7 +20,6 @@ class HelperstatusIcon {
     init() {
         type = .normal
         statusIcon.length = StatusIconLength.show
-        statusIcon.highlightMode = false
 
         guard let statusIconButton = statusIcon.button else {
             fatalError("helper status item button failed")

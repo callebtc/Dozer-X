@@ -1,7 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
-
 import Cocoa
 import Sparkle
 import Preferences
@@ -25,8 +21,9 @@ final class Dozer: NSViewController, PreferencePane {
             versionLabel.stringValue = "\(releaseVersionNumber) (\(buildVersionNumber))"
         }
 
-        checkForUpdates.target = SUUpdater.shared()!
-        checkForUpdates.action = #selector(SUUpdater.shared()!.checkForUpdates(_:))
+        let updater = AppDelegate.shared.sparkleUpdaterController
+        checkForUpdates.target = updater
+        checkForUpdates.action = #selector(SPUStandardUpdaterController.checkForUpdates(_:))
 
         quit.action = #selector(NSApp.terminate(_:))
     }

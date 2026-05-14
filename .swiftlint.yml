@@ -1,4 +1,4 @@
-whitelist_rules:
+only_rules:
   - anyobject_protocol
   - array_init
   - attributes
@@ -125,7 +125,7 @@ whitelist_rules:
   - yoda_condition
 analyzer_rules:
   - unused_import
-  - unused_private_declaration
+  - unused_declaration
 force_cast: warning
 force_unwrapping: warning
 number_separator:
@@ -153,5 +153,15 @@ identifier_name:
     - 'x2'
     - 'y1'
     - 'y2'
+    - 'LaunchAtLoginCheckbox'
+    - 'CheckForUpdatesCheckbox'
+    - 'HideStatusBarIconsAtLaunchCheckbox'
+    - 'HideStatusBarIconsAfterDelayCheckbox'
+    - 'HideStatusBarIconsSecondsPopUpButton'
+    - 'HideBothDozerIconsCheckbox'
+    - 'EnableRemoveDozerIconCheckbox'
+    - 'ShowIconAndMenuCheckbox'
+    - 'FontSizePopUpButton'
+    - 'ButtonPaddingPopUpButton'
 included:
     - Dozer

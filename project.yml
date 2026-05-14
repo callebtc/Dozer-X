@@ -3,47 +3,58 @@ options:
   usesTabs: false
   tabWidth: 4
   createIntermediateGroups: true
-  xcodeVersion: 10.2.1
-  deploymentTarget: 10.13
+  xcodeVersion: 15.0
+  deploymentTarget: 14.0
+packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: "2.0.0"
+  LaunchAtLogin:
+    url: https://github.com/sindresorhus/LaunchAtLogin-Modern
+    from: "1.0.0"
+  Defaults:
+    url: https://github.com/sindresorhus/Defaults
+    from: "7.0.0"
+  Preferences:
+    url: https://github.com/sindresorhus/Preferences
+    from: "2.0.0"
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.0.0"
 targets:
   Dozer:
     type: application
     platform: macOS
-    deploymentTarget: 
-      macOS: 10.13
+    deploymentTarget:
+      macOS: 14.0
     configFiles:
       Debug: Configs/Debug.xcconfig
       Release: Configs/Release.xcconfig
     sources:
       - Dozer
     postBuildScripts:
-      - path: Scripts/LaunchAtLogin.sh
-        name: Launch At Login
-        runOnlyWhenInstalling: true
-      - path: Scripts/SignFrameworks.sh
-        name: Sign Frameworks
-        runOnlyWhenInstalling: true
-        runOnlyWhenInstalling: true
-      - script: /usr/local/bin/swiftgen
-        name: Generate files using SwiftGen
       - path: Scripts/Swiftlint.sh
         name: Swiftlint
+      - path: Scripts/Swiftgen.sh
+        name: Generate files using SwiftGen
     settings:
       base:
+        ARCHS: "$(ARCHS_STANDARD)"
+        ONLY_ACTIVE_ARCH: YES
         CODE_SIGN_ENTITLEMENTS: Dozer/Other/Dozer.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: "com.mortennn.Dozer"
         SWIFT_VERSION: 5
         DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
         ENABLE_HARDENED_RUNTIME: true
-        MACOSX_DEPLOYMENT_TARGET: 10.13
+        MACOSX_DEPLOYMENT_TARGET: 14.0
         VERSIONING_SYSTEM: apple-generic
         CURRENT_PROJECT_VERSION: 30
     dependencies:
-      - carthage: LaunchAtLogin
-      - carthage: Defaults
-      - carthage: Preferences
-      - carthage: MASShortcut
-      - carthage: Sparkle
+      - package: KeyboardShortcuts
+      - package: LaunchAtLogin
+      - package: Defaults
+      - package: Preferences
+      - package: Sparkle
 schemes:
   Dozer:
     build:

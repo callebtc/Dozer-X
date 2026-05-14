@@ -18,7 +18,6 @@
                 <outlet property="HideStatusBarIconsSecondsPopUpButton" destination="Ziw-so-qpj" id="iWr-jc-Wbb"/>
                 <outlet property="LaunchAtLoginCheckbox" destination="29f-2D-VsY" id="X2Z-FE-7IA"/>
                 <outlet property="ShowIconAndMenuCheckbox" destination="oAW-Yf-7fi" id="7ZW-82-aRZ"/>
-                <outlet property="ToggleMenuItemsView" destination="4Dt-wS-aZ8" id="PAm-fa-zGy"/>
                 <outlet property="view" destination="c22-O7-iKe" id="buC-Sz-vlD"/>
             </connections>
         </customObject>
@@ -106,14 +105,15 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w7z-Qa-kqw">
-	            <rect key="frame" x="18" y="240" width="357" height="18"/>
-	            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-	            <buttonCell key="cell" type="check" title="Hide both Dozer icons when menu bar icons are hidden" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="PrK-hp-6i2">
-		            <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-	            </buttonCell>
-	            <connections>
-		            <action selector="hideBothDozerIconsClicked:" target="-2" id="PdP-dQ-ir6"/>
-	            </connections>
+                    <rect key="frame" x="18" y="240" width="357" height="18"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="check" title="Hide both Dozer icons when menu bar icons are hidden" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="PrK-hp-6i2">
+                        <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="hideBothDozerIconsClicked:" target="-2" id="PdP-dQ-ir6"/>
+                    </connections>
                 </button>
                 <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yjj-cw-XAs">
                     <rect key="frame" x="36" y="224" width="349" height="13"/>
@@ -234,14 +234,10 @@
                     <rect key="frame" x="20" y="43" width="365" height="5"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                 </box>
-                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Dt-wS-aZ8" customClass="MASShortcutView">
-                    <rect key="frame" x="20" y="15" width="106" height="20"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                </customView>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nmU-jA-Ht8">
                     <rect key="frame" x="130" y="17" width="249" height="17"/>
                     <autoresizingMask key="autoresizingMask"/>
-                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Show/hide menu bar icons" id="HZP-sl-H5I">
+                    <textFieldCell key="cell" lineBreakMode="clipping" alignment="left" title="Show/hide menu bar icons" id="HZP-sl-HI5">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
