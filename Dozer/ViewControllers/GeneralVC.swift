@@ -17,6 +17,7 @@ final class General: NSViewController, PreferencePane {
         updaterDelegate: nil,
         userDriverDelegate: nil
     )
+    private var defaultsObserver: NSObjectProtocol?
 
     @IBOutlet private var LaunchAtLoginCheckbox: NSButton!
     @IBOutlet private var CheckForUpdatesCheckbox: NSButton!
@@ -49,12 +50,18 @@ final class General: NSViewController, PreferencePane {
         addKeyboardShortcutRecorder()
         configureEnabledNoIconCheckbox()
 
-        NotificationCenter.default.addObserver(
+        defaultsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.configureEnabledNoIconCheckbox()
+        }
+    }
+
+    deinit {
+        if let defaultsObserver {
+            NotificationCenter.default.removeObserver(defaultsObserver)
         }
     }
 
@@ -114,6 +121,8 @@ final class General: NSViewController, PreferencePane {
     private func configureEnabledNoIconCheckbox() {
         let hasShortcut = KeyboardShortcuts.getShortcut(for: .toggleMenuItems) != nil
         HideBothDozerIconsCheckbox.isEnabled = hasShortcut
-        Defaults[.isShortcutSet] = hasShortcut
+        if Defaults[.isShortcutSet] != hasShortcut {
+            Defaults[.isShortcutSet] = hasShortcut
+        }
     }
 }
