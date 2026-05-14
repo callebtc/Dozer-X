@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>4.2.0</string>
+	<string>5.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>30</string>
+	<string>50</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
@@ -31,8 +31,8 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/Mortennn/Dozer/master/appcast.xml</string>
+	<string>https://github.com/callebtc/Dozer-X/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>97gvwr+B10rf6Exnj8yPuAXrYSu9yKikViJkYkvPMHY=</string>
+	<string>cwC434A7DiuefVmT5zcLVDer76/wv75SAj2iSPdA07M=</string>
 </dict>
 </plist>

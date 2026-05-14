@@ -1,62 +1,73 @@
-<p align="center">
-	<img width="200" height="200" margin-right="100%" src="https://raw.githubusercontent.com/Mortennn/Dozer/master/Stuff/AppIcon.png">
-</p>
-<p align="center">Hide menu bar icons to give your Mac a cleaner look.</p>
-<p align="center">
-	<a href="https://github.com/Mortennn/Dozer/releases/latest">
- 		<img src="https://img.shields.io/badge/download-latest-brightgreen.svg" alt="download">
-	<a href="https://img.shields.io/badge/platform-macOS-lightgrey.svg">
- 		<img src="https://img.shields.io/badge/platform-macOS-lightgrey.svg" alt="platform">
-	</a>
-	<a href="https://img.shields.io/badge/requirements-macOS High Sierra+-ff69b4.svg">
- 		<img src="https://img.shields.io/badge/requirements-macOS High Sierra+-lightgrey.svg" alt="systemrequirements">
-	</a>
-	<a href="https://github.com/sindresorhus/swiftlint-sindre">
- 		<img src="https://img.shields.io/badge/SwiftLint-Sindre-hotpink.svg" alt="swiftlint">
-	</a>
-	<a href="https://opensource.org/licenses/MPL-2.0">
- 		<img src="https://img.shields.io/badge/License-MPL%202.0-orange.svg" alt="license">
-	</a>
-</p>
-<p align="center">
-	<img height="100" min-width="100" src="https://github.com/Mortennn/Dozer/raw/master/Stuff/demo.gif" alt="demo">
-</p>
+# Dozer-X
 
-<p align="center"></p>
-<a href="https://www.buymeacoffee.com/mortennn" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+Dozer-X is a maintained fork of [Dozer](https://github.com/Mortennn/Dozer), the lightweight macOS menu bar utility for hiding status bar icons.
 
-## ⚙️ Install
-Using [Homebrew Cask](https://formulae.brew.sh/cask/dozer):
-```shell
-brew install --cask dozer
+The original Dozer project has not been updated since 2020 and its release binaries are Intel-only. Dozer-X keeps the same core behavior, but updates the project so it builds and runs natively on modern macOS without Rosetta.
+
+## Goals
+
+- Keep Dozer's original minimal menu bar workflow.
+- Avoid adding new product features unless they are needed for modern macOS support.
+- Ship native Apple Silicon builds.
+- Replace deprecated tooling and dependencies.
+- Keep the app robust for future macOS releases.
+
+## What Changed In Dozer-X 5.0.0
+
+- Raised the minimum supported macOS version to macOS 14 Sonoma.
+- Added native Apple Silicon support.
+- Migrated dependencies from Carthage to Swift Package Manager.
+- Replaced MASShortcut with [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts).
+- Updated Sparkle from 1.x to Sparkle 2.x.
+- Switched launch-at-login support to the modern macOS 13+ `SMAppService` path through [LaunchAtLogin-Modern](https://github.com/sindresorhus/LaunchAtLogin-Modern).
+- Removed the Objective-C bridging header and legacy Carthage build scripts.
+- Updated XcodeGen, SwiftGen, and SwiftLint usage for current developer tools.
+- Fixed startup behavior for modern AppKit so the menu bar icons are created reliably.
+- Fixed the Preferences crash caused by recursive UserDefaults change handling.
+
+## Install
+
+Download the latest release from the [Dozer-X releases page](https://github.com/callebtc/Dozer-X/releases/latest), unzip it, and move `Dozer.app` to `/Applications`.
+
+Homebrew Cask still points at the deprecated upstream Dozer release and is not recommended for Dozer-X.
+
+## Requirements
+
+- macOS 14 Sonoma or later
+- Apple Silicon or Intel Mac
+
+## Usage
+
+Dozer adds two small dots to the menu bar by default. A third dot can be enabled in Preferences.
+
+- Move menu bar icons you want to hide to the left of the second Dozer dot.
+- Left-click a Dozer dot to hide or show that group of menu bar icons.
+- Right-click a Dozer dot to open Preferences.
+- Option-click a Dozer dot to show or hide the optional third group, if enabled.
+- Hold Command (`Command`) and drag menu bar icons to rearrange them.
+
+## Development
+
+Dozer-X uses XcodeGen and Swift Package Manager.
+
+```sh
+make build
 ```
 
-Manual:
+Generate, build, and run the app:
 
-[Download](https://github.com/Mortennn/Dozer/releases/latest), open and drag the app to the Applications folder.
+```sh
+make run
+```
 
-## ⚫️ Dozer Icons
+The generated `Dozer.xcodeproj` is intentionally ignored by Git.
 
-There are 2 or 3, numbered from right to left:
+## Relationship To Original Dozer
 
-1. this can be positioned anywhere you prefer, it is only a point of interaction
-2. this and everything to its left will be hidden/shown by clicking any Dozer icon
-3. (Optional) the "remove" icon and everything to its left will be hidden/shown by option-clicking any Dozer icon
+Dozer-X is a fork of [Mortennn/Dozer](https://github.com/Mortennn/Dozer). The original project remains the source of the app's concept and UI behavior, but it is deprecated for current macOS use because its published builds are old and Intel-only.
 
-## 👨‍💻 Usage
+Dozer-X keeps the app name as `Dozer` in most system-facing places for continuity, while the About pane identifies this fork as `Dozer-X`.
 
-* Move the icons you want to hide until clicked to the left of the second Dozer icon
-* Move the icons you want to hide until option-clicked to the left of the third Dozer icon
+## License
 
-**N.B. hold command (`⌘`) then drag to move the menu bar icons.**
-
-## 👇 Interactions
-* Left-click one of the Dozer icons to hide/show the first group of menu bar icons
-* Option-Left-click one of the Dozer icons to show the second group of menu bar icons (optional)
-* Right-click one of the Dozer icons to open the settings
-
-<!-- GIF is commented out until it is redone -->
-<!-- **Checkout [this GIF](https://raw.githubusercontent.com/Mortennn/Dozer/master/Stuff/demo.gif) to watch Dozer in action.** -->
-
-## 📄 Requirements
-macOS 10.13+
+Dozer-X is licensed under the Mozilla Public License 2.0, following the original Dozer project.

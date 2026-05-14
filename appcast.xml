@@ -1,11 +1,25 @@
-<?xml version="1.0" standalone="yes"?><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
 <channel>
-<title>Dozer</title>
+<title>Dozer-X</title>
 <item>
-<title>4.0.0</title>
-<description><![CDATA[<h2>New features in version 4:</h2><ul><li>”Remove”-icon. Additional icon to hide/show icons with `option+click`</li><li>Auto-hide status bar icons #22</li><li>”No Icon”-mode. Hide/show only using keyboard shortcut</li></ul><h2>Other:</h2><ul><li>Improved UI in preferences</li></ul><ul>]]></description>
-<pubDate>Tue, 20 Aug 2019 13:01:53 +0200</pubDate>
-<sparkle:minimumSystemVersion>10.13</sparkle:minimumSystemVersion>
-<enclosure url="https://github.com/Mortennn/Dozer/releases/download/v4.0.0/Dozer.4.0.0.dmg" sparkle:version="27" sparkle:shortVersionString="4.0.0" length="8081734" type="application/octet-stream" sparkle:edSignature="CFXdt4FjQxevj6FfjDlpXQyHV7rYm8RGBRV8uw+nE6EulKvt04rLb8VBwjywG5GgqooXW78y073hO079KGkhAQ=="/>
+<title>5.0.0</title>
+<description><![CDATA[
+<h2>Dozer-X 5.0.0</h2>
+<p>This release modernizes the deprecated upstream Dozer app for current macOS systems.</p>
+<ul>
+<li>Raises the minimum supported macOS version to macOS 14 Sonoma.</li>
+<li>Adds native Apple Silicon support while keeping Intel support in Release builds.</li>
+<li>Migrates dependencies from Carthage to Swift Package Manager.</li>
+<li>Updates Sparkle to 2.x and points update checks at the Dozer-X fork.</li>
+<li>Replaces MASShortcut with KeyboardShortcuts.</li>
+<li>Uses modern macOS launch-at-login support.</li>
+<li>Fixes modern AppKit startup and Preferences crash issues.</li>
+</ul>
+]]></description>
+<pubDate>Thu, 14 May 2026 15:56:44 -0500</pubDate>
+<sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+<enclosure url="https://github.com/callebtc/Dozer-X/releases/download/v5.0.0/Dozer-5.0.0.zip" sparkle:version="50" sparkle:shortVersionString="5.0.0" length="2128634" type="application/octet-stream" sparkle:edSignature="04NsTwktbLH9KRmiE8Cw1omFAyITPV+UuTdZQSDjn3+jKXSAUZuA0M+dYZQz7BwaKS3RyDc9SHWU/N/yaARUBA=="/>
 </item>
-</channel></rss>
+</channel>
+</rss>

@@ -30,15 +30,15 @@
                     </buttonCell>
                 </button>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SpT-W4-9Jy">
-                    <rect key="frame" x="18" y="83" width="60" height="24"/>
-                    <textFieldCell key="cell" lineBreakMode="clipping" title="Dozer" id="aTf-T7-WMw">
+                    <rect key="frame" x="18" y="83" width="79" height="24"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="Dozer-X" id="aTf-T7-WMw">
                         <font key="font" metaFont="systemBold" size="20"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
                 <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="55H-bw-r5z">
-                    <rect key="frame" x="82" y="85" width="82" height="16"/>
+                    <rect key="frame" x="101" y="85" width="63" height="16"/>
                     <textFieldCell key="cell" lineBreakMode="clipping" title="x.x.x (xxx)" id="D7X-My-KCz">
                         <font key="font" metaFont="systemLight" size="13"/>
                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>

@@ -40,7 +40,6 @@ targets:
     settings:
       base:
         ARCHS: "$(ARCHS_STANDARD)"
-        ONLY_ACTIVE_ARCH: YES
         CODE_SIGN_ENTITLEMENTS: Dozer/Other/Dozer.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: "com.mortennn.Dozer"
         SWIFT_VERSION: 5
@@ -48,7 +47,12 @@ targets:
         ENABLE_HARDENED_RUNTIME: true
         MACOSX_DEPLOYMENT_TARGET: 14.0
         VERSIONING_SYSTEM: apple-generic
-        CURRENT_PROJECT_VERSION: 30
+        CURRENT_PROJECT_VERSION: 50
+      configs:
+        Debug:
+          ONLY_ACTIVE_ARCH: YES
+        Release:
+          ONLY_ACTIVE_ARCH: NO
     dependencies:
       - package: KeyboardShortcuts
       - package: LaunchAtLogin
