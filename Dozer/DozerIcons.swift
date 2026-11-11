@@ -6,6 +6,7 @@ public final class DozerIcons {
     private var dozerIcons: [HelperstatusIcon] = []
     private var timerToCheckUserInteraction = Timer()
     private var timerToHideDozerIcons = Timer()
+    private var startupHideTimer: Timer?
     private var previousApp = NSRunningApplication()
     private let nativeVisibility: NativeMenuBarVisibility? = {
         if #available(macOS 27, *) {
@@ -178,9 +179,10 @@ public final class DozerIcons {
     }
 
     public func hideAtLaunch() {
+        startupHideTimer?.invalidate()
         if hideStatusBarIconsAtLaunch {
             if #available(macOS 11.0, *) {
-                Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { _ in
+                startupHideTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { _ in
                    self.hide()
                 }
             } else {
@@ -251,6 +253,7 @@ public final class DozerIcons {
 
     /// Force show all Dozer icons
     public func showAll() {
+        startupHideTimer?.invalidate()
         if nativeVisibility != nil {
             applyNativeVisibility(hideNormal: false, hideRemove: false)
             return
@@ -333,7 +336,7 @@ public final class DozerIcons {
     }
 
     // MARK: Private methods
-    private func applyNativeVisibility(hideNormal: Bool, hideRemove: Bool) {
+    private func applyNativeVisibility(hideNormal: Bool, hideRemove: Bool, completion: ((Error?) -> Void)? = nil) {
         guard let nativeVisibility = nativeVisibility else {
             return
         }
@@ -378,21 +381,44 @@ public final class DozerIcons {
                 self.stopTimer()
                 self.stopUserInteractionTimer()
                 guard self.lastNativeError != error.localizedDescription else {
+                    completion?(error)
                     return
                 }
                 self.lastNativeError = error.localizedDescription
                 let alert = NSAlert()
-                alert.messageText = "Dozer could not hide menu bar icons"
+                alert.messageText = "Dozer could not change menu bar visibility"
                 alert.informativeText = error.localizedDescription
                 NSApp.activate(ignoringOtherApps: true)
                 alert.runModal()
             } else {
                 self.lastNativeError = nil
             }
+            completion?(error)
+        }
+    }
+
+    public func recoverVisibility(completion: @escaping (Error?) -> Void = { _ in }) {
+        startupHideTimer?.invalidate()
+        stopTimer()
+        stopUserInteractionTimer()
+        guard nativeVisibility != nil else {
+            showAll()
+            stopTimer()
+            stopUserInteractionTimer()
+            completion(nil)
+            return
+        }
+        applyNativeVisibility(hideNormal: false, hideRemove: false) { [weak self] error in
+            self?.stopTimer()
+            self?.stopUserInteractionTimer()
+            completion(error)
         }
     }
 
     public func restoreBeforeQuitting() {
+        startupHideTimer?.invalidate()
+        stopTimer()
+        stopUserInteractionTimer()
         nativeVisibility?.restore()
         for icon in dozerIcons { icon.show() }
     }

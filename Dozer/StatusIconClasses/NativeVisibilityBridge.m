@@ -32,31 +32,13 @@ void DozerNativeVisibilityActivate(NSArray<NSString *> *allowedBundles,
         finish(nil, VisibilityError(@"This version of macOS does not provide the menu bar visibility service."));
         return;
     }
+    id assertion;
     @try {
-        id assertion = [[NSClassFromString(@"MBAssessmentModeAssertion") alloc] init];
+        assertion = [[NSClassFromString(@"MBAssessmentModeAssertion") alloc] init];
         if (!assertion) {
             finish(nil, VisibilityError(@"Could not create the menu bar visibility configuration."));
             return;
         }
-        DozerNativeVisibilityUpdate(assertion, allowedBundles, ^(NSError *error) {
-            if (error) { DozerNativeVisibilityInvalidate(assertion); }
-            completion(error ? nil : assertion, error);
-        });
-    } @catch (NSException *exception) {
-        finish(nil, VisibilityError(exception.reason ?: @"The menu bar visibility service failed."));
-    }
-}
-
-void DozerNativeVisibilityUpdate(id assertion, NSArray<NSString *> *allowedBundles,
-                                void (^completion)(NSError *)) {
-    void (^finish)(NSError *) = ^(NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{ completion(error); });
-    };
-    if (!DozerNativeVisibilityIsAvailable()) {
-        finish(VisibilityError(@"This version of macOS does not provide the menu bar visibility service."));
-        return;
-    }
-    @try {
         id configuration;
         if (allowedBundles) {
             NSMutableArray<NSNumber *> *systemItems = [NSMutableArray array];
@@ -72,13 +54,18 @@ void DozerNativeVisibilityUpdate(id assertion, NSArray<NSString *> *allowedBundl
                 NSSelectorFromString(@"initWithUnrestrictedMenuBarItems"));
         }
         if (!configuration) {
-            finish(VisibilityError(@"Could not create the menu bar visibility configuration."));
+            DozerNativeVisibilityInvalidate(assertion);
+            finish(nil, VisibilityError(@"Could not create the menu bar visibility configuration."));
             return;
         }
         ((void (*)(id, SEL, id, void (^)(NSError *)))objc_msgSend)(
-            assertion, NSSelectorFromString(@"activateWithConfiguration:completionHandler:"), configuration, finish);
+            assertion, NSSelectorFromString(@"activateWithConfiguration:completionHandler:"), configuration, ^(NSError *error) {
+                if (error) { DozerNativeVisibilityInvalidate(assertion); }
+                finish(error ? nil : assertion, error);
+            });
     } @catch (NSException *exception) {
-        finish(VisibilityError(exception.reason ?: @"The menu bar visibility service failed."));
+        DozerNativeVisibilityInvalidate(assertion);
+        finish(nil, VisibilityError(exception.reason ?: @"The menu bar visibility service failed."));
     }
 }
 

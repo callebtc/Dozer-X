@@ -58,8 +58,12 @@ macOS 27 no longer lets oversized separators push other menu bar icons offscreen
 - Newly launched applications remain visible until their icons can be classified from an unrestricted layout.
 - System controls such as Control Center, Wi-Fi, and the clock remain visible.
 - Show all icons before rearranging the dots or moving apps between sections. Restricted icons do not report reliable positions, so Dozer keeps the last unrestricted layout until all groups are expanded again.
-- Dozer updates an existing visibility assertion rather than stacking assertions when switching groups, and restores an unrestricted configuration before releasing it. Dozer adds no fade or artificial reveal delay; any menu bar animation performed by macOS is system-controlled.
-- This support is experimental because macOS exposes the visibility service through the private `MenuBarClientCore` framework. Dozer checks the service at runtime and restores all icons on errors, timeouts, and quit.
+- Dozer explicitly invalidates each native assertion before activating its replacement. Repeated activation on the same native object can leave earlier restrictions behind. Dozer adds no fade or artificial reveal delay; any menu bar animation performed by macOS is system-controlled.
+- Startup and reopening request a fresh unrestricted configuration even if this instance has not hidden anything. A second cooperating Dozer instance asks the running copy to reveal every group and exits without creating its own separators or restrictions. Older copies are asked to quit gracefully, and Dozer waits for them to exit before taking control.
+- Recovery after another instance or an interrupted hiding session leaves every group expanded, without immediately applying hide-at-launch or auto-hide. Your preferences and icon order are preserved; click a dot or use your shortcut when you want to hide again.
+- From Terminal, request recovery with `"/Applications/Dozer-X.app/Contents/MacOS/Dozer" --recover-menu-bar`. This also reveals all groups in an already running cooperating copy.
+- Dozer can release its own restrictions, not assertions owned by other menu bar managers. Quit any other menu bar manager if icons remain hidden after reopening Dozer.
+- This support is experimental because macOS exposes the visibility service through the private `MenuBarClientCore` framework. Dozer checks the service at runtime and releases its restrictions on errors, timeouts, quit, and ordinary termination signals.
 
 The implementation is adapted from [upstream Dozer PR #212](https://github.com/Mortennn/Dozer/pull/212) and [Hidden Bar](https://github.com/dwarvesf/hidden). See `THIRD_PARTY_NOTICES.md` for the third-party license.
 

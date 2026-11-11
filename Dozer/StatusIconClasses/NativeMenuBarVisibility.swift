@@ -9,6 +9,15 @@ struct MenuBarVisibilityState: Equatable {
 enum MenuBarVisibilityConfiguration {
     case unrestricted
     case allowing([String])
+
+    func activate(completion: @escaping (Any?, Error?) -> Void) {
+        switch self {
+        case .unrestricted:
+            DozerNativeVisibilityActivate(nil, completion)
+        case .allowing(let bundles):
+            DozerNativeVisibilityActivate(bundles, completion)
+        }
+    }
 }
 
 protocol MenuBarVisibilityAssertion: AnyObject {
@@ -18,11 +27,15 @@ protocol MenuBarVisibilityAssertion: AnyObject {
 
 protocol MenuBarVisibilityProviding {
     var isAvailable: Bool { get }
-    func activate(allowing bundles: [String], completion: @escaping (Result<MenuBarVisibilityAssertion, Error>) -> Void)
+    func activate(
+        _ configuration: MenuBarVisibilityConfiguration,
+        completion: @escaping (Result<MenuBarVisibilityAssertion, Error>) -> Void
+    )
 }
 
 final class NativeVisibilityAssertion: MenuBarVisibilityAssertion {
     private var value: AnyObject?
+    private var isInvalidated = false
     private var isUpdating = false
     private var pendingUpdate: (configuration: MenuBarVisibilityConfiguration, completion: (Error?) -> Void)?
 
@@ -31,7 +44,7 @@ final class NativeVisibilityAssertion: MenuBarVisibilityAssertion {
     private var cancelled: Error { NSError(domain: "DozerNativeVisibility", code: NSUserCancelledError) }
 
     func update(_ configuration: MenuBarVisibilityConfiguration, completion: @escaping (Error?) -> Void) {
-        guard let value = value else {
+        guard !isInvalidated else {
             completion(cancelled)
             return
         }
@@ -42,32 +55,30 @@ final class NativeVisibilityAssertion: MenuBarVisibilityAssertion {
             return
         }
         isUpdating = true
-        let finish: (Error?) -> Void = { [weak self] error in
-            guard let self = self, self.value != nil else {
-                DozerNativeVisibilityInvalidate(value)
+        if let previous = value { DozerNativeVisibilityInvalidate(previous) }
+        value = nil
+        configuration.activate { [weak self] replacement, error in
+            guard let self = self, !self.isInvalidated else {
+                if let replacement = replacement { DozerNativeVisibilityInvalidate(replacement) }
                 return
             }
             self.isUpdating = false
-            completion(error)
+            self.value = replacement as AnyObject?
+            completion(error ?? (replacement == nil ? NSError(domain: "DozerNativeVisibility", code: 1) : nil))
             if let pending = self.pendingUpdate {
                 self.pendingUpdate = nil
                 self.update(pending.configuration, completion: pending.completion)
             }
         }
-        switch configuration {
-        case .unrestricted:
-            DozerNativeVisibilityUpdate(value, nil, finish)
-        case .allowing(let bundles):
-            DozerNativeVisibilityUpdate(value, bundles, finish)
-        }
     }
 
     func invalidate() {
-        guard let value = value else {
+        guard !isInvalidated else {
             return
         }
+        isInvalidated = true
+        if let value = value { DozerNativeVisibilityInvalidate(value) }
         self.value = nil
-        DozerNativeVisibilityInvalidate(value)
         let pending = pendingUpdate
         pendingUpdate = nil
         pending?.completion(cancelled)
@@ -79,8 +90,11 @@ final class NativeVisibilityAssertion: MenuBarVisibilityAssertion {
 struct NativeVisibilityService: MenuBarVisibilityProviding {
     var isAvailable: Bool { DozerNativeVisibilityIsAvailable() }
 
-    func activate(allowing bundles: [String], completion: @escaping (Result<MenuBarVisibilityAssertion, Error>) -> Void) {
-        DozerNativeVisibilityActivate(bundles) { assertion, error in
+    func activate(
+        _ configuration: MenuBarVisibilityConfiguration,
+        completion: @escaping (Result<MenuBarVisibilityAssertion, Error>) -> Void
+    ) {
+        configuration.activate { assertion, error in
             if let assertion = assertion {
                 completion(.success(NativeVisibilityAssertion(assertion as AnyObject)))
             } else {
@@ -91,6 +105,9 @@ struct NativeVisibilityService: MenuBarVisibilityProviding {
 }
 
 final class NativeMenuBarVisibility {
+    static let recoveryPreference = "nativeMenuBarVisibilityNeedsRecovery"
+    static var needsRecovery: Bool { UserDefaults.standard.bool(forKey: recoveryPreference) }
+
     enum Section: Int {
         case remove, normal, visible
     }
@@ -98,6 +115,7 @@ final class NativeMenuBarVisibility {
     private let inventory: MenuBarInventoryProviding
     private let service: MenuBarVisibilityProviding
     private let ownBundle: String
+    private let preferences: UserDefaults
     private let runningBundles: () -> [String]
     private var assertion: MenuBarVisibilityAssertion?
     private var sections: [String: Section] = [:]
@@ -110,6 +128,7 @@ final class NativeMenuBarVisibility {
         inventory: MenuBarInventoryProviding = MenuBarInventory(),
         service: MenuBarVisibilityProviding = NativeVisibilityService(),
         ownBundle: String = Bundle.main.bundleIdentifier ?? "com.mortennn.Dozer",
+        preferences: UserDefaults = .standard,
         runningBundles: @escaping () -> [String] = {
             NSWorkspace.shared.runningApplications.compactMap { $0.bundleIdentifier }
         }
@@ -117,6 +136,7 @@ final class NativeMenuBarVisibility {
         self.inventory = inventory
         self.service = service
         self.ownBundle = ownBundle
+        self.preferences = preferences
         self.runningBundles = runningBundles
     }
 
@@ -157,18 +177,28 @@ final class NativeMenuBarVisibility {
         let request = generation
         requestedState = state
         if state == .expanded {
-            guard let assertion = assertion, service.isAvailable else {
+            assertion?.invalidate()
+            assertion = nil
+            sections.removeAll()
+            hasSnapshot = false
+            guard service.isAvailable else {
                 restore()
                 completion(nil)
                 return
             }
             startApplying(request: request, completion: completion)
-            assertion.update(.unrestricted) { [weak self] error in
+            service.activate(.unrestricted) { [weak self] result in
+                if case .success(let unrestricted) = result { unrestricted.invalidate() }
                 guard let self = self, self.generation == request else {
                     return
                 }
                 self.restore()
-                completion(error)
+                switch result {
+                case .success:
+                    completion(nil)
+                case .failure(let error):
+                    completion(error)
+                }
             }
             return
         }
@@ -182,7 +212,7 @@ final class NativeMenuBarVisibility {
             ))
         }
         guard service.isAvailable else {
-            fail("Menu bar hiding is unavailable on this version of macOS. All icons have been restored.")
+            fail("Menu bar hiding is unavailable on this version of macOS. Dozer's visibility restrictions have been released.")
             return
         }
         guard inventory.isAuthorized else {
@@ -190,6 +220,7 @@ final class NativeMenuBarVisibility {
             fail("Allow Dozer in System Settings → Privacy & Security → Accessibility, then click a Dozer dot again.")
             return
         }
+        preferences.set(true, forKey: Self.recoveryPreference)
         startApplying(request: request, completion: completion)
 
         let activate: ([String: Section]) -> Void = { [weak self] sections in
@@ -228,7 +259,7 @@ final class NativeMenuBarVisibility {
                     if let error = error { finish(.failure(error)) } else { finish(.success(updating)) }
                 }
             } else {
-                self.service.activate(allowing: allowed.sorted(), completion: finish)
+                self.service.activate(.allowing(allowed.sorted()), completion: finish)
             }
         }
 
@@ -257,7 +288,7 @@ final class NativeMenuBarVisibility {
             completion(NSError(
                 domain: "DozerNativeVisibility",
                 code: 2,
-                userInfo: [NSLocalizedDescriptionKey: "The menu bar did not respond. All icons have been restored."]
+                userInfo: [NSLocalizedDescriptionKey: "The menu bar did not respond. Dozer's visibility restrictions have been released."]
             ))
         }
     }
@@ -270,6 +301,7 @@ final class NativeMenuBarVisibility {
         assertion = nil
         sections.removeAll()
         hasSnapshot = false
+        preferences.removeObject(forKey: Self.recoveryPreference)
     }
 
     deinit { assertion?.invalidate() }
