@@ -217,7 +217,7 @@ final class NativeMenuBarVisibility {
         }
         guard inventory.isAuthorized else {
             inventory.requestAuthorization()
-            fail("Allow Dozer in System Settings → Privacy & Security → Accessibility, then click a Dozer dot again.")
+            fail("Allow this copy of Dozer to control apps in System Settings → Privacy & Security, then click a Dozer dot again.")
             return
         }
         preferences.set(true, forKey: Self.recoveryPreference)

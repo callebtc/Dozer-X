@@ -52,9 +52,10 @@ Selective Option-click hiding requires **Enable 'remove' Dozer icon** in General
 
 macOS 27 no longer lets oversized separators push other menu bar icons offscreen. Dozer-X uses the system's native visibility service on macOS 27 and later; macOS 14–26 retain the original separator behavior.
 
-- Install `Dozer.app` in `/Applications` before running it.
-- Grant Dozer access in **System Settings → Privacy & Security → Accessibility** when prompted, then click a Dozer dot again. This permission is needed to find the icons to the left of the separator.
+- Install `Dozer.app` in a stable location before granting permission, and grant access to that specific copy. Replacing a locally signed build or moving it may require granting access again.
+- Grant Dozer access in **System Settings → Privacy & Security → Device Control and Data Access** (called **Accessibility** on older macOS versions) when prompted, then click a Dozer dot again. This permission is needed to find the icons to the left of the separator.
 - Visibility is controlled per application, across all displays. If an app's reported icons occupy both hidden and visible sections, its most visible placement wins. Apps without readable positions, and positions reported outside the separator's display, are left visible.
+- Native visibility is best-effort: macOS may omit an allowlisted application's icon even when Dozer classifies it as visible. Dozer does not undo a successful hide or display a blocking warning just because an icon is missing from the native accessibility tree. Click the dot or use your shortcut to reveal icons; actual service failures and timeouts still release Dozer's restrictions.
 - Newly launched applications remain visible until their icons can be classified from an unrestricted layout.
 - System controls such as Control Center, Wi-Fi, and the clock remain visible.
 - Show all icons before rearranging the dots or moving apps between sections. Restricted icons do not report reliable positions, so Dozer keeps the last unrestricted layout until all groups are expanded again.
