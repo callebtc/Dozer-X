@@ -5,6 +5,7 @@ class RemoveStatusIcon: HelperstatusIcon {
     override init() {
         super.init()
         type = .remove
+        statusIcon.button?.setAccessibilityLabel("Dozer permanently hidden section")
     }
 
     override func statusIconClicked(_: AnyObject?) {

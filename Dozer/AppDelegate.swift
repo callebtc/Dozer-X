@@ -18,10 +18,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.shared = self
     }
 
+    func applicationWillTerminate(_: Notification) {
+        DozerIcons.shared.restoreBeforeQuitting()
+    }
+
     func applicationDidFinishLaunching(_: Notification) {
         KeyboardShortcuts.onKeyUp(for: .toggleMenuItems) {
             DozerIcons.shared.toggle()
         }
+
+        Defaults[.isShortcutSet] = KeyboardShortcuts.getShortcut(for: .toggleMenuItems) != nil
 
         _ = DozerIcons.shared
 
@@ -43,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     lazy var preferencesWindowController = PreferencesWindowController(
         preferencePanes: preferences,
         style: .toolbarItems,
-        animated: true,
+        animated: false,
         hidesToolbarForSingleItem: true
     )
 

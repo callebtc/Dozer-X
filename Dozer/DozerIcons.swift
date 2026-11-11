@@ -7,6 +7,15 @@ public final class DozerIcons {
     private var timerToCheckUserInteraction = Timer()
     private var timerToHideDozerIcons = Timer()
     private var previousApp = NSRunningApplication()
+    private let nativeVisibility: NativeMenuBarVisibility? = {
+        if #available(macOS 27, *) {
+            return NativeMenuBarVisibility()
+        }
+        return nil
+    }()
+    private var nativeNormalLeft: HelperstatusIcon?
+    private var lastNativeError: String?
+    private var applicationLaunchObserver: NSObjectProtocol?
 
     private init() {
         dozerIcons.append(NormalStatusIcon())
@@ -27,9 +36,35 @@ public final class DozerIcons {
             self.triggerHideBothDozerIcons()
         }
         .tieToLifetime(of: self)
+
+        if nativeVisibility != nil {
+            applicationLaunchObserver = NSWorkspace.shared.notificationCenter.addObserver(
+                forName: NSWorkspace.didLaunchApplicationNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                guard let self = self, let nativeVisibility = self.nativeVisibility,
+                      let application = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                      application.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
+                    return
+                }
+                let state = nativeVisibility.requestedState
+                guard state != .expanded else {
+                    return
+                }
+                self.applyNativeVisibility(hideNormal: state.hideNormal, hideRemove: state.hideRemove)
+            }
+        }
+    }
+
+    deinit {
+        if let observer = applicationLaunchObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
     }
 
     private func startUserInteractionTimer() {
+        stopUserInteractionTimer()
         guard Defaults[.hideAfterDelayEnabled] else {
             stopUserInteractionTimer()
             return
@@ -71,11 +106,12 @@ public final class DozerIcons {
     }
 
     public func triggerHideBothDozerIcons() {
+        if nativeVisibility != nil { showAll() }
         let normalStatusIconsCount = dozerIcons.filter { $0.type == .normal}.count
         if hideBothDozerIcons && Defaults[.isShortcutSet] {
             if normalStatusIconsCount == 2 {
-                let rightDozerIconXPos = get(dozerIcon: .normalRight).xPositionOnScreen
-                dozerIcons.removeAll { $0.xPositionOnScreen == rightDozerIconXPos }
+                let rightDozerIcon = get(dozerIcon: .normalRight)
+                dozerIcons.removeAll { $0 === rightDozerIcon }
             }
         } else if !hideBothDozerIcons && Defaults[.isShortcutSet] || !Defaults[.isShortcutSet] {
             if normalStatusIconsCount == 1 {
@@ -128,6 +164,10 @@ public final class DozerIcons {
 
     // MARK: Public methods
     public func hide() {
+        if nativeVisibility != nil {
+            applyNativeVisibility(hideNormal: true, hideRemove: enableRemoveDozerIcon)
+            return
+        }
         perform(action: .hide, statusIcon: .remove)
         perform(action: .hide, statusIcon: .normalLeft)
         if Defaults[.noIconMode] && Defaults[.isShortcutSet] {
@@ -150,6 +190,10 @@ public final class DozerIcons {
     }
 
     public func show() {
+        if nativeVisibility != nil {
+            applyNativeVisibility(hideNormal: false, hideRemove: enableRemoveDozerIcon)
+            return
+        }
         resetTimer()
         perform(action: .hide, statusIcon: .remove)
         perform(action: .show, statusIcon: .normalLeft)
@@ -161,6 +205,10 @@ public final class DozerIcons {
     }
 
     public func toggle() {
+        if let nativeVisibility = nativeVisibility {
+            if nativeVisibility.requestedState.hideNormal { show() } else { hide() }
+            return
+        }
         if get(dozerIcon: .normalLeft).isShown {
             hide()
         } else {
@@ -169,6 +217,11 @@ public final class DozerIcons {
     }
 
     public func toggleRemove() {
+        if let nativeVisibility = nativeVisibility {
+            applyNativeVisibility(hideNormal: nativeVisibility.requestedState.hideNormal,
+                                  hideRemove: !nativeVisibility.requestedState.hideRemove && enableRemoveDozerIcon)
+            return
+        }
         if get(dozerIcon: .remove).isShown {
             perform(action: .hide, statusIcon: .remove)
         } else {
@@ -198,6 +251,10 @@ public final class DozerIcons {
 
     /// Force show all Dozer icons
     public func showAll() {
+        if nativeVisibility != nil {
+            applyNativeVisibility(hideNormal: false, hideRemove: false)
+            return
+        }
         perform(action: .show, statusIcon: .remove)
         perform(action: .show, statusIcon: .normalLeft)
         perform(action: .show, statusIcon: .normalRight)
@@ -205,6 +262,11 @@ public final class DozerIcons {
     }
 
     public func handleOptionClick() {
+        if let nativeVisibility = nativeVisibility {
+            let hideRemove = !nativeVisibility.requestedState.hideNormal && !nativeVisibility.requestedState.hideRemove
+            applyNativeVisibility(hideNormal: false, hideRemove: hideRemove && enableRemoveDozerIcon)
+            return
+        }
         showIconAndMenu()
         if get(dozerIcon: .normalLeft).isShown {
             DozerIcons.shared.perform(
@@ -271,6 +333,70 @@ public final class DozerIcons {
     }
 
     // MARK: Private methods
+    private func applyNativeVisibility(hideNormal: Bool, hideRemove: Bool) {
+        guard let nativeVisibility = nativeVisibility else {
+            return
+        }
+        let left = nativeNormalLeft ?? get(dozerIcon: .normalLeft)
+        nativeNormalLeft = left
+        let remove = dozerIcons.first { $0.type == .remove }
+        func accessibilityFrame(_ frame: CGRect?) -> CGRect? {
+            guard var frame = frame, let primaryScreen = NSScreen.screens.first else {
+                return nil
+            }
+            frame.origin.y = primaryScreen.frame.maxY - frame.maxY
+            return frame
+        }
+        let state = MenuBarVisibilityState(hideNormal: hideNormal, hideRemove: hideRemove)
+        let normalFrame = accessibilityFrame(left.frameOnScreen)
+        let removeFrame = accessibilityFrame(remove?.frameOnScreen)
+        let screenFrame = accessibilityFrame(left.statusIcon.button?.window?.screen?.frame)
+        nativeVisibility.apply(state, normal: normalFrame, remove: removeFrame, screen: screenFrame) { [weak self] error in
+            guard let self = self else {
+                return
+            }
+            let applied = nativeVisibility.requestedState
+            for icon in self.dozerIcons {
+                let shouldHide: Bool
+                if icon.type == .remove {
+                    shouldHide = applied.hideRemove
+                } else {
+                    shouldHide = applied.hideNormal && (icon === left || self.hideBothDozerIcons && Defaults[.isShortcutSet])
+                }
+                if shouldHide { icon.hide() } else { icon.show() }
+            }
+            if applied == .expanded { self.nativeNormalLeft = nil }
+            if applied.hideNormal {
+                self.didHideStatusBarIcons()
+                self.hideIconAndMenu()
+            } else {
+                self.resetTimer()
+                self.didShowStatusBarIcons()
+                self.showIconAndMenu()
+            }
+            if let error = error {
+                self.stopTimer()
+                self.stopUserInteractionTimer()
+                guard self.lastNativeError != error.localizedDescription else {
+                    return
+                }
+                self.lastNativeError = error.localizedDescription
+                let alert = NSAlert()
+                alert.messageText = "Dozer could not hide menu bar icons"
+                alert.informativeText = error.localizedDescription
+                NSApp.activate(ignoringOtherApps: true)
+                alert.runModal()
+            } else {
+                self.lastNativeError = nil
+            }
+        }
+    }
+
+    public func restoreBeforeQuitting() {
+        nativeVisibility?.restore()
+        for icon in dozerIcons { icon.show() }
+    }
+
     /// Will fail silently if statusIcon does not exist
     private func perform(action: StatusIconAction, statusIcon: DozerIcon) {
         if statusIcon == .remove {
@@ -291,6 +417,14 @@ public final class DozerIcons {
 
     /// Will crash if trying to get DozerIcon which does not exist in the menu bar
     private func get(dozerIcon: DozerIcon) -> HelperstatusIcon {
+        if let left = nativeNormalLeft {
+            if dozerIcon == .normalLeft {
+                return left
+            }
+            if dozerIcon == .normalRight {
+                return dozerIcons.first { $0.type == .normal && $0 !== left } ?? left
+            }
+        }
         var normalStatusIconsXPosition: [CGFloat] = []
         for statusIcon in dozerIcons where statusIcon.type == .normal {
             normalStatusIconsXPosition.append(statusIcon.xPositionOnScreen)
@@ -302,12 +436,12 @@ public final class DozerIcons {
             }
             return removeStatusIcon
         case .normalLeft:
-            guard let leftStatusIcon = dozerIcons.first(where: { $0.xPositionOnScreen == normalStatusIconsXPosition.min() }) else {
+            guard let leftStatusIcon = dozerIcons.first(where: { $0.type == .normal && $0.xPositionOnScreen == normalStatusIconsXPosition.min() }) else {
                 fatalError("Failed getting status icon on the left")
             }
             return leftStatusIcon
         case .normalRight:
-            guard let rightStatusIcon = dozerIcons.first(where: { $0.xPositionOnScreen == normalStatusIconsXPosition.max() }) else {
+            guard let rightStatusIcon = dozerIcons.first(where: { $0.type == .normal && $0.xPositionOnScreen == normalStatusIconsXPosition.max() }) else {
                 fatalError("Failed getting status icon on the right")
             }
             return rightStatusIcon
@@ -325,6 +459,24 @@ public final class DozerIcons {
 
     /// Determines if the user is interacting with the menu bar based on level, owner and y-coordinate
     private func isUserInteractingWithStatusBar() -> Bool {
+        if #available(macOS 27, *) {
+            let mouse = NSEvent.mouseLocation
+            if NSScreen.screens.contains(where: { screen in
+                let height = max(NSStatusBar.system.thickness, screen.safeAreaInsets.top)
+                return CGRect(
+                    x: screen.frame.minX,
+                    y: screen.frame.maxY - height,
+                    width: screen.frame.width,
+                    height: height
+                ).contains(mouse)
+            }) {
+                return true
+            }
+            let windows = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? []
+            return windows.contains {
+                ($0[kCGWindowLayer as String] as? Int) == NSWindow.Level.popUpMenu.rawValue
+            }
+        }
         let windowListType = CGWindowListOption.optionOnScreenOnly
         guard let windowInfoList = CGWindowListCopyWindowInfo(windowListType, kCGNullWindowID) as NSArray? as? [[String: AnyObject]] else {
             return false

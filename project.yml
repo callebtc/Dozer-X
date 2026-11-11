@@ -32,6 +32,8 @@ targets:
       Release: Configs/Release.xcconfig
     sources:
       - Dozer
+      - path: THIRD_PARTY_NOTICES.md
+        buildPhase: resources
     postBuildScripts:
       - path: Scripts/Swiftlint.sh
         name: Swiftlint
@@ -43,6 +45,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Dozer/Other/Dozer.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: "com.mortennn.Dozer"
         SWIFT_VERSION: 5
+        SWIFT_OBJC_BRIDGING_HEADER: Dozer/StatusIconClasses/NativeVisibilityBridge.h
         DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
         ENABLE_HARDENED_RUNTIME: true
         MACOSX_DEPLOYMENT_TARGET: 14.0

@@ -20,6 +20,9 @@ class HelperstatusIcon {
     init() {
         type = .normal
         statusIcon.length = StatusIconLength.show
+        if #available(macOS 27, *) {
+            statusIcon.isVisible = true
+        }
 
         guard let statusIconButton = statusIcon.button else {
             fatalError("helper status item button failed")
@@ -27,19 +30,27 @@ class HelperstatusIcon {
 
         statusIconButton.target = self
         statusIconButton.action = #selector(statusIconClicked(_:))
+        statusIconButton.setAccessibilityLabel("Dozer dot")
         setIcon()
         statusIconButton.sendAction(on: [.leftMouseDown, .rightMouseDown])
     }
 
     deinit {
-        print("status item has been deallocated")
+        NSStatusBar.system.removeStatusItem(statusIcon)
     }
 
     func show() {
         statusIcon.length = StatusIconLength.show
+        if #available(macOS 27, *) {
+            statusIcon.isVisible = true
+        }
     }
 
     func hide() {
+        if #available(macOS 27, *) {
+            statusIcon.isVisible = false
+            return
+        }
         statusIcon.length = StatusIconLength.hide
     }
 
@@ -81,18 +92,24 @@ class HelperstatusIcon {
     func statusIconClicked(_ sender: AnyObject?) {}
 
     var isShown: Bool {
-        statusIcon.length == StatusIconLength.show
+        if #available(macOS 27, *) {
+            return statusIcon.isVisible
+        }
+        return statusIcon.length == StatusIconLength.show
     }
 
     var isHidden: Bool {
-        statusIcon.length == StatusIconLength.hide
+        !isShown
+    }
+
+    var frameOnScreen: CGRect? {
+        guard let button = statusIcon.button, let window = button.window else {
+            return nil
+        }
+        return window.convertToScreen(button.convert(button.bounds, to: nil))
     }
 
     var xPositionOnScreen: CGFloat {
-        guard let dozerIconFrame = statusIcon.button?.window?.frame else {
-            return 0
-        }
-        let dozerIconXPosition = dozerIconFrame.origin.x
-        return dozerIconXPosition
+        frameOnScreen?.minX ?? 0
     }
 }

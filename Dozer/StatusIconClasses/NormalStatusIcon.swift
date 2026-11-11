@@ -1,5 +1,4 @@
 import Cocoa
-import Defaults
 
 class NormalStatusIcon: HelperstatusIcon {
     override init() {
@@ -12,9 +11,7 @@ class NormalStatusIcon: HelperstatusIcon {
             return
         }
 
-        if currentEvent.modifierFlags.contains(.option) &&
-            !currentEvent.modifierFlags.contains(.control) &&
-            !currentEvent.modifierFlags.contains(.command) {
+        if Self.isOptionClick(eventModifiers: currentEvent.modifierFlags, currentModifiers: NSEvent.modifierFlags) {
             DozerIcons.shared.handleOptionClick()
 
             return
@@ -28,5 +25,10 @@ class NormalStatusIcon: HelperstatusIcon {
         default:
             break
         }
+    }
+
+    static func isOptionClick(eventModifiers: NSEvent.ModifierFlags, currentModifiers: NSEvent.ModifierFlags) -> Bool {
+        let modifiers = eventModifiers.union(currentModifiers).intersection(.deviceIndependentFlagsMask)
+        return modifiers.contains(.option) && !modifiers.contains(.control) && !modifiers.contains(.command)
     }
 }
