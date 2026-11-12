@@ -107,7 +107,7 @@
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="w7z-Qa-kqw">
                     <rect key="frame" x="18" y="240" width="357" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Hide both Dozer icons when menu bar icons are hidden" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="PrK-hp-6i2">
+                    <buttonCell key="cell" type="check" title="Hide all Dozer dots when icons are hidden" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="PrK-hp-6i2">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -118,16 +118,16 @@
                 <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yjj-cw-XAs">
                     <rect key="frame" x="36" y="224" width="349" height="13"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Use the shortcut to show the menu bar icons." id="vbw-Q7-ecG">
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Use the shortcut to reveal all; auto-hide still applies." id="vbw-Q7-ecG">
                         <font key="font" metaFont="system" size="10"/>
                         <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pDX-1f-4hl">
+                <button toolTip="Adds a small divider for icons that stay hidden on normal clicks. Option-click a Dozer dot to reveal them. No applications are removed." verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pDX-1f-4hl">
                     <rect key="frame" x="18" y="197" width="361" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="check" title="Enable 'remove' Dozer icon" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Toa-to-mCu">
+                    <buttonCell key="cell" type="check" title="Enable an extra-hidden section" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Toa-to-mCu">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -138,7 +138,7 @@
                 <textField horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IDw-Ag-Gcv">
                     <rect key="frame" x="36" y="168" width="349" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Enable additional Dozer icon. Show/hide less frequently used menu bar icons using option+click." id="UjO-Yp-XO4">
+                    <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Command-drag the small dot left of the main divider.&#10;Option-click a Dozer dot to reveal icons left of it." lineBreakMode="wordWrapping" id="UjO-Yp-XO4">
                         <font key="font" metaFont="system" size="10"/>
                         <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

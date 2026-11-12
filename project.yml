@@ -32,6 +32,8 @@ targets:
       Release: Configs/Release.xcconfig
     sources:
       - Dozer
+      - path: THIRD_PARTY_NOTICES.md
+        buildPhase: resources
     postBuildScripts:
       - path: Scripts/Swiftlint.sh
         name: Swiftlint
@@ -43,6 +45,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Dozer/Other/Dozer.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: "com.mortennn.Dozer"
         SWIFT_VERSION: 5
+        SWIFT_OBJC_BRIDGING_HEADER: Dozer/StatusIconClasses/NativeVisibilityBridge.h
         DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
         ENABLE_HARDENED_RUNTIME: true
         MACOSX_DEPLOYMENT_TARGET: 14.0
@@ -59,8 +62,25 @@ targets:
       - package: Defaults
       - package: Preferences
       - package: Sparkle
+  MenuBarVisibilityStateTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget:
+      macOS: 14.0
+    sources:
+      - Dozer/StatusIconClasses/MenuBarVisibilityState.swift
+      - Tests/MenuBarVisibilityStateTests.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mortennn.Dozer.MenuBarVisibilityStateTests
+        SWIFT_VERSION: 5
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
 schemes:
   Dozer:
     build:
       targets:
         Dozer: all
+    test:
+      targets:
+        - MenuBarVisibilityStateTests

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+Fixed:
+* Restore menu bar hiding on macOS 27 using the native visibility service, with Accessibility permission and fail-open error handling.
+* Invalidate native visibility assertions before replacing them so earlier restrictions cannot accumulate when switching groups.
+* Recover visibility at startup and reopen, coordinate duplicate Dozer instances, and keep recovered icons expanded without changing preferences.
+* Release owned restrictions on ordinary termination signals as well as normal quit.
+* Refresh the native allowlist when an application launches so unclassified new icons are not silently hidden.
+* Recognize Option-click when a forwarded status item event omits the current Option modifier.
+* Remove Preferences window animations and restore Dozer's dots at startup even if macOS remembers them as hidden.
+
 ## Version 4.2.0
 New features:
 * Configure amount of seconds to hide the icons after #104. @blakedgordon

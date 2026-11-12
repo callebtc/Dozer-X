@@ -44,7 +44,34 @@ Dozer adds two small dots to the menu bar by default. A third dot can be enabled
 - Left-click a Dozer dot to hide or show that group of menu bar icons.
 - Right-click a Dozer dot to open Preferences.
 - Option-click a Dozer dot to show or hide the optional third group, if enabled.
+- On macOS 27, the keyboard shortcut reveals every group; pressing it again hides the configured groups.
 - Hold Command (`Command`) and drag menu bar icons to rearrange them.
+
+For icons you want to keep hidden on normal clicks, select **Enable an extra-hidden section** in General Preferences. Command-drag its smaller dot to the left of the normal hiding divider. Icons to the left of the smaller dot form the extra-hidden section; icons between the dividers form the normal section. Option-click a Dozer dot to reveal or hide the extra-hidden section. This changes icon visibility, not the applications themselves.
+
+Enabling or disabling this setting reveals all sections and pauses auto-hide so you can arrange the dividers. Click a dot or use your shortcut when you are ready to hide again. On macOS 27, a misplaced smaller dot does not capture the normal section: extra-hidden classification starts only when it is left of the normal divider on the same menu bar.
+
+If **Hide all Dozer dots when icons are hidden** is enabled, no dot remains while hidden. Use the shortcut to reveal every group. **Automatically hide menu bar icons** can hide them again after its selected delay; disable that setting if you want a shortcut reveal to stay open.
+
+## macOS 27 Compatibility
+
+macOS 27 no longer lets oversized separators push other menu bar icons offscreen. Dozer-X uses the system's native visibility service on macOS 27 and later; macOS 14–26 retain the original separator behavior.
+
+- Install `Dozer.app` in a stable location before granting permission, and grant access to that specific copy. Replacing a locally signed build or moving it may require granting access again.
+- Grant Dozer access in **System Settings → Privacy & Security → Device Control and Data Access** (called **Accessibility** on older macOS versions) when prompted, then click a Dozer dot again. This permission is needed to find the icons to the left of the separator.
+- Visibility is controlled per application, across all displays. If an app's reported icons occupy both hidden and visible sections, its most visible placement wins. Apps without readable positions, and positions reported outside the separator's display, are left visible.
+- Native visibility is best-effort: macOS may omit an allowlisted application's icon even when Dozer classifies it as visible. Dozer does not undo a successful hide or display a blocking warning just because an icon is missing from the native accessibility tree. Click the dot or use your shortcut to reveal icons; actual service failures and timeouts still release Dozer's restrictions.
+- Newly launched applications remain visible until their icons can be classified from an unrestricted layout.
+- System controls such as Control Center, Wi-Fi, and the clock remain visible.
+- Show all icons before rearranging the dots or moving apps between sections. Restricted icons do not report reliable positions, so Dozer keeps the last unrestricted layout until all groups are expanded again.
+- Dozer explicitly invalidates each native assertion before activating its replacement. Repeated activation on the same native object can leave earlier restrictions behind. Dozer adds no fade or artificial reveal delay; any menu bar animation performed by macOS is system-controlled.
+- Startup and reopening request a fresh unrestricted configuration even if this instance has not hidden anything. A second cooperating Dozer instance asks the running copy to reveal every group and exits without creating its own separators or restrictions. Older copies are asked to quit gracefully, and Dozer waits for them to exit before taking control.
+- Recovery after another instance or an interrupted hiding session leaves every group expanded, without immediately applying hide-at-launch or auto-hide. Your preferences and icon order are preserved; click a dot or use your shortcut when you want to hide again.
+- From Terminal, run the `Dozer` executable inside your installed app bundle with `--recover-menu-bar`. For a `~/bin/dozer/Dozer-X.app` install, use `"$HOME/bin/dozer/Dozer-X.app/Contents/MacOS/Dozer" --recover-menu-bar`. This also reveals all groups in an already running cooperating copy.
+- Dozer can release its own restrictions, not assertions owned by other menu bar managers. Quit any other menu bar manager if icons remain hidden after reopening Dozer.
+- This support is experimental because macOS exposes the visibility service through the private `MenuBarClientCore` framework. Dozer checks the service at runtime and releases its restrictions on errors, timeouts, quit, and ordinary termination signals.
+
+The implementation is adapted from [upstream Dozer PR #212](https://github.com/Mortennn/Dozer/pull/212) and [Hidden Bar](https://github.com/dwarvesf/hidden). See `THIRD_PARTY_NOTICES.md` for the third-party license.
 
 ## Development
 

@@ -5,6 +5,8 @@ class RemoveStatusIcon: HelperstatusIcon {
     override init() {
         super.init()
         type = .remove
+        statusIcon.button?.setAccessibilityLabel("Dozer extra-hidden section divider")
+        statusIcon.button?.toolTip = "Icons to the left stay hidden on normal clicks. Option-click a Dozer dot to reveal them."
     }
 
     override func statusIconClicked(_: AnyObject?) {
@@ -12,12 +14,18 @@ class RemoveStatusIcon: HelperstatusIcon {
             return
         }
 
-        switch currentEvent.type {
-        case .leftMouseDown:
+        switch NormalStatusIcon.clickAction(
+            eventType: currentEvent.type,
+            eventModifiers: currentEvent.modifierFlags,
+            currentModifiers: NSEvent.modifierFlags
+        ) {
+        case .toggle:
             DozerIcons.shared.toggleRemove()
-        case .rightMouseDown:
+        case .optionClick:
+            DozerIcons.shared.handleOptionClick()
+        case .preferences:
             AppDelegate.shared.preferencesWindowController.show(preferencePane: .general)
-        default:
+        case .ignore:
             break
         }
     }
