@@ -4,6 +4,29 @@ struct MenuBarVisibilityState: Equatable {
     var hideNormal = false
     var hideRemove = false
     static let expanded = MenuBarVisibilityState()
+
+    func applying(_ action: MenuBarVisibilityAction, extraEnabled: Bool) -> Self {
+        switch action {
+        case .hide:
+            return Self(hideNormal: true, hideRemove: extraEnabled)
+        case .showNormal:
+            return Self(hideNormal: false, hideRemove: extraEnabled)
+        case .toggleNormal:
+            return Self(hideNormal: !hideNormal, hideRemove: extraEnabled)
+        case .toggleExtra:
+            return Self(hideNormal: hideNormal, hideRemove: extraEnabled && !hideRemove)
+        case .optionClick:
+            return Self(hideNormal: false, hideRemove: extraEnabled && self == .expanded)
+        case .toggleAll:
+            return self == .expanded ? Self(hideNormal: true, hideRemove: extraEnabled) : .expanded
+        case .revealAll:
+            return .expanded
+        }
+    }
+}
+
+enum MenuBarVisibilityAction {
+    case hide, showNormal, toggleNormal, toggleExtra, optionClick, toggleAll, revealAll
 }
 
 enum MenuBarVisibilityConfiguration {
@@ -146,6 +169,17 @@ final class NativeMenuBarVisibility {
         remove: CGRect?,
         screen: CGRect? = nil
     ) -> [String: Section] {
+        let remove = remove.flatMap { frame -> CGRect? in
+            let center = CGPoint(x: frame.midX, y: frame.midY)
+            guard frame.width > 0, frame.height > 0,
+                  center.x.isFinite, center.y.isFinite,
+                  frame.midX < normal.midX,
+                  abs(frame.midY - normal.midY) < max(normal.height, frame.height),
+                  screen?.contains(center) != false else {
+                return nil
+            }
+            return frame
+        }
         var result: [String: Section] = [:]
         for item in items {
             var section = Section.visible

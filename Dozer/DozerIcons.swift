@@ -107,7 +107,7 @@ public final class DozerIcons {
     }
 
     public func triggerHideBothDozerIcons() {
-        if nativeVisibility != nil { showAll() }
+        if nativeVisibility != nil { recoverVisibility() }
         let normalStatusIconsCount = dozerIcons.filter { $0.type == .normal}.count
         if hideBothDozerIcons && Defaults[.isShortcutSet] {
             if normalStatusIconsCount == 2 {
@@ -116,22 +116,25 @@ public final class DozerIcons {
             }
         } else if !hideBothDozerIcons && Defaults[.isShortcutSet] || !Defaults[.isShortcutSet] {
             if normalStatusIconsCount == 1 {
-                show()
+                if nativeVisibility == nil { show() }
                 dozerIcons.append(NormalStatusIcon())
             }
         }
-        show()
+        if nativeVisibility == nil { show() }
     }
 
     public var enableRemoveDozerIcon: Bool = Defaults[.removeDozerIconEnabled] {
         didSet {
+            guard enableRemoveDozerIcon != oldValue else {
+                return
+            }
             Defaults[.removeDozerIconEnabled] = self.enableRemoveDozerIcon
             if enableRemoveDozerIcon {
                 dozerIcons.append(RemoveStatusIcon())
             } else {
                 dozerIcons.removeAll { $0.type == .remove }
             }
-            showAll()
+            recoverVisibility()
         }
     }
 
@@ -166,7 +169,7 @@ public final class DozerIcons {
     // MARK: Public methods
     public func hide() {
         if nativeVisibility != nil {
-            applyNativeVisibility(hideNormal: true, hideRemove: enableRemoveDozerIcon)
+            applyNativeAction(.hide)
             return
         }
         perform(action: .hide, statusIcon: .remove)
@@ -193,7 +196,7 @@ public final class DozerIcons {
 
     public func show() {
         if nativeVisibility != nil {
-            applyNativeVisibility(hideNormal: false, hideRemove: enableRemoveDozerIcon)
+            applyNativeAction(.showNormal)
             return
         }
         resetTimer()
@@ -207,8 +210,8 @@ public final class DozerIcons {
     }
 
     public func toggle() {
-        if let nativeVisibility = nativeVisibility {
-            if nativeVisibility.requestedState.hideNormal { show() } else { hide() }
+        if nativeVisibility != nil {
+            applyNativeAction(.toggleNormal)
             return
         }
         if get(dozerIcon: .normalLeft).isShown {
@@ -218,10 +221,17 @@ public final class DozerIcons {
         }
     }
 
+    public func toggleAll() {
+        if nativeVisibility != nil {
+            applyNativeAction(.toggleAll)
+        } else {
+            toggle()
+        }
+    }
+
     public func toggleRemove() {
-        if let nativeVisibility = nativeVisibility {
-            applyNativeVisibility(hideNormal: nativeVisibility.requestedState.hideNormal,
-                                  hideRemove: !nativeVisibility.requestedState.hideRemove && enableRemoveDozerIcon)
+        if nativeVisibility != nil {
+            applyNativeAction(.toggleExtra)
             return
         }
         if get(dozerIcon: .remove).isShown {
@@ -255,7 +265,7 @@ public final class DozerIcons {
     public func showAll() {
         startupHideTimer?.invalidate()
         if nativeVisibility != nil {
-            applyNativeVisibility(hideNormal: false, hideRemove: false)
+            applyNativeAction(.revealAll)
             return
         }
         perform(action: .show, statusIcon: .remove)
@@ -265,9 +275,8 @@ public final class DozerIcons {
     }
 
     public func handleOptionClick() {
-        if let nativeVisibility = nativeVisibility {
-            let hideRemove = !nativeVisibility.requestedState.hideNormal && !nativeVisibility.requestedState.hideRemove
-            applyNativeVisibility(hideNormal: false, hideRemove: hideRemove && enableRemoveDozerIcon)
+        if nativeVisibility != nil {
+            applyNativeAction(.optionClick)
             return
         }
         showIconAndMenu()
@@ -336,6 +345,14 @@ public final class DozerIcons {
     }
 
     // MARK: Private methods
+    private func applyNativeAction(_ action: MenuBarVisibilityAction, completion: ((Error?) -> Void)? = nil) {
+        guard let nativeVisibility = nativeVisibility else {
+            return
+        }
+        let state = nativeVisibility.requestedState.applying(action, extraEnabled: enableRemoveDozerIcon)
+        applyNativeVisibility(hideNormal: state.hideNormal, hideRemove: state.hideRemove, completion: completion)
+    }
+
     private func applyNativeVisibility(hideNormal: Bool, hideRemove: Bool, completion: ((Error?) -> Void)? = nil) {
         guard let nativeVisibility = nativeVisibility else {
             return
@@ -408,7 +425,7 @@ public final class DozerIcons {
             completion(nil)
             return
         }
-        applyNativeVisibility(hideNormal: false, hideRemove: false) { [weak self] error in
+        applyNativeAction(.revealAll) { [weak self] error in
             self?.stopTimer()
             self?.stopUserInteractionTimer()
             completion(error)

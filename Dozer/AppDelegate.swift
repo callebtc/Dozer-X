@@ -76,7 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func initializeIcons(recovered: Bool) {
         let needsRecovery = recovered || recoveryRequested || NativeMenuBarVisibility.needsRecovery
         KeyboardShortcuts.onKeyUp(for: .toggleMenuItems) {
-            DozerIcons.shared.toggle()
+            DozerIcons.shared.toggleAll()
         }
 
         Defaults[.isShortcutSet] = KeyboardShortcuts.getShortcut(for: .toggleMenuItems) != nil
