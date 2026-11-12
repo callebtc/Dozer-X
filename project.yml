@@ -62,8 +62,25 @@ targets:
       - package: Defaults
       - package: Preferences
       - package: Sparkle
+  MenuBarVisibilityStateTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget:
+      macOS: 14.0
+    sources:
+      - Dozer/StatusIconClasses/MenuBarVisibilityState.swift
+      - Tests/MenuBarVisibilityStateTests.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mortennn.Dozer.MenuBarVisibilityStateTests
+        SWIFT_VERSION: 5
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: "-"
 schemes:
   Dozer:
     build:
       targets:
         Dozer: all
+    test:
+      targets:
+        - MenuBarVisibilityStateTests
